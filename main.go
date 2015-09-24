@@ -27,7 +27,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	PostToSlack(slackURL, ipAddress)
+	lastIPFile := os.Getenv("HOME") + "/.last_ip"
+	fileContents, err := ioutil.ReadFile(lastIPFile)
+	lastIPAddress := string(fileContents)
+	if err != nil || lastIPAddress != ipAddress {
+		PostToSlack(slackURL, ipAddress)
+		ioutil.WriteFile(lastIPFile, []byte(ipAddress), 0644)
+		fmt.Println("Updated IP Address")
+	} else {
+		fmt.Println("Same IP Address as last time, skipping.")
+	}
 }
 
 func GetIPAddress() (string, error) {
